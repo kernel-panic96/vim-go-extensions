@@ -1,5 +1,11 @@
 " vim: foldmethod=indent
 
+let s:save_cpo = &cpo
+set cpo&vim
+
+let s:default_breakpoint_symbol = '>'
+let s:default_current_line_symbol = '='
+
 let s:default_mappings = [
     \["nnoremap", "<F5>",  "<Plug>(go-debug-continue)"],
     \["nnoremap", "<F6>",  "<Plug>(go-debug-print)"],
@@ -21,6 +27,7 @@ function! s:reverse_dict(d)
 
     return l:res
 endfunction
+
 
 " Meta information, used for restoring the user's mappings to the state
 " that they were before starting the debugger
@@ -150,12 +157,10 @@ function! s:backup_mappings(mappings)
 endfunction
 
 function! go_debug_extender#Breakpoint()
-    call go#debug#Breakpoint()
-    sign define godebugbreakpoint text=
-    sign define godebugcurline    text=
+    silent call go#debug#Breakpoint()
+    exe ":sign define godebugbreakpoint text=" . get(g:, "go_debug_breakpoint_symbol", s:default_breakpoint_symbol)
+    exe ":sign define godebugcurline text=" . get(g:, "go_debug_current_line_symbol", s:default_current_line_symbol)
 endfunction
 
-command! -nargs=* -complete=customlist,go#package#Complete MyGoDebugStart call go_debug_extender#DebugStart(<f-args>)
-command! -nargs=* -complete=customlist,go#package#Complete MyGoDebugTest call go_debug_extender#DebugTest(<f-args>)
-command! -nargs=* -complete=customlist,go#package#Complete MyGoDebugStop call go_debug_extender#Stop(<f-args>)
-command! MyGoDebugBreakpoint call go_debug_extender#Breakpoint()
+let &cpo = s:save_cpo
+unlet s:save_cpo
