@@ -91,15 +91,15 @@ endfunction
 function! go_debug_extender#DebugStart(...) abort
 	call go_debug_extender#Setup()
 
-    delcommand MyGoDebugStart
+    delcommand ExtendedGoDebugStart
     execute "GoDebugStart" join(a:000)
 endfunction
 
 function! go_debug_extender#DebugTest(...) abort
     call go_debug_extender#Setup()
 
-    delcommand MyGoDebugTest
-    delcommand MyGoDebugStart
+    delcommand ExtendedGoDebugTest
+    delcommand ExtendedGoDebugStart
 
     " call go#debug#Start(1, a:000)
     execute "GoDebugTest" join(a:000)
@@ -142,8 +142,8 @@ function! go_debug_extender#Stop(...) abort
         execute command
     endfor
 
-    command! -nargs=* -complete=customlist,go#package#Complete MyGoDebugStart call go_debug_extender#DebugStart(<f-args>)
-    command! -nargs=* -complete=customlist,go#package#Complete MyGoDebugTest call go_debug_extender#DebugTest(<f-args>)
+    command! -nargs=* -complete=customlist,go#package#Complete ExtendedGoDebugStart call go_debug_extender#DebugStart(<f-args>)
+    command! -nargs=* -complete=customlist,go#package#Complete ExtendedGoDebugTest call go_debug_extender#DebugTest(<f-args>)
     execute "GoDebugStop" join(a:000)
 endfunction
 
