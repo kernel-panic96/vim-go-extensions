@@ -162,5 +162,47 @@ function! go_debug_extender#Breakpoint()
     exe ":sign define godebugcurline text=" . get(g:, "go_debug_current_line_symbol", s:default_current_line_symbol)
 endfunction
 
+
+function! go_debug_extender#ListBreakpoints()
+    " This function is copy-pasted from vim-go's code, because it's unexported
+    " :sign place
+    " --- Signs ---
+    " Signs for a.go:
+    "     line=15  id=2  name=godebugbreakpoint
+    "     line=16  id=1  name=godebugbreakpoint
+    " Signs for a_test.go:
+    "     line=6  id=3  name=godebugbreakpoint
+
+    let l:signs = []
+    let l:file = ''
+    for l:line in split(execute('sign place'), '\n')[1:]
+        if l:line =~# '^Signs for '
+            let l:file = l:line[10:-2]
+            continue
+        endif
+
+        if l:line !~# 'name=godebugbreakpoint'
+            continue
+        endif
+
+        let l:sign = matchlist(l:line, '\vline\=(\d+) +id\=(\d+)')
+        call add(l:signs, {
+                    \ 'id': l:sign[2],
+                    \ 'file': fnamemodify(l:file, ':p'),
+                    \ 'line': str2nr(l:sign[1]),
+                    \ })
+    endfor
+
+    return l:signs
+endfunction
+
+function! go_debug_extender#ClearAllBreakpoints()
+    let l:breakpoints = go_debug_extender#ListBreakpoints()
+
+    for b in l:breakpoints 
+        call go#debug#Breakpoint(b['line'], b['file'])
+    endfor
+endfunction
+
 let &cpo = s:save_cpo
 unlet s:save_cpo
