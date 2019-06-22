@@ -156,51 +156,29 @@ function! s:backup_mappings(mappings)
     return res
 endfunction
 
-function! go_debug_extender#Breakpoint()
-    silent call go#debug#Breakpoint()
+function! go_debug_extender#Breakpoint(...)
+    silent call call(function('go#debug#Breakpoint'), a:000)
+
     exe ":sign define godebugbreakpoint text=" . get(g:, "go_debug_breakpoint_symbol", s:default_breakpoint_symbol)
     exe ":sign define godebugcurline text=" . get(g:, "go_debug_current_line_symbol", s:default_current_line_symbol)
 endfunction
 
-
-function! go_debug_extender#ListBreakpoints()
-    " This function is copy-pasted from vim-go's code, because it's unexported
-    " :sign place
-    " --- Signs ---
-    " Signs for a.go:
-    "     line=15  id=2  name=godebugbreakpoint
-    "     line=16  id=1  name=godebugbreakpoint
-    " Signs for a_test.go:
-    "     line=6  id=3  name=godebugbreakpoint
-
-    let l:signs = []
+function! go_debug_extender#ClearAllBreakpoints(...)
     let l:file = ''
-    for l:line in split(execute('sign place'), '\n')[1:]
-        if l:line =~# '^Signs for '
-            let l:file = l:line[10:-2]
-            continue
+    if len(a:000) > 0
+        let l:file = a:1
+    endif
+
+    let l:breakpoints = utils#ListBreakpoints()
+
+    for bp in l:breakpoints 
+        if l:file != ''
+            if l:file == bp['file']
+                call go_debug_extender#Breakpoint(bp['line'], bp['file'])
+            endif
+        else
+            call go_debug_extender#Breakpoint(bp['line'], bp['file'])
         endif
-
-        if l:line !~# 'name=godebugbreakpoint'
-            continue
-        endif
-
-        let l:sign = matchlist(l:line, '\vline\=(\d+) +id\=(\d+)')
-        call add(l:signs, {
-                    \ 'id': l:sign[2],
-                    \ 'file': fnamemodify(l:file, ':p'),
-                    \ 'line': str2nr(l:sign[1]),
-                    \ })
-    endfor
-
-    return l:signs
-endfunction
-
-function! go_debug_extender#ClearAllBreakpoints()
-    let l:breakpoints = go_debug_extender#ListBreakpoints()
-
-    for b in l:breakpoints 
-        call go#debug#Breakpoint(b['line'], b['file'])
     endfor
 endfunction
 
