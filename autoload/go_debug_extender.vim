@@ -22,72 +22,21 @@ let s:default_mappings = [
     \["nnoremap", "<F11>", "<Plug>(go-debug-step)"],
 \]
 
-function! s:reverse_dict(d)
-    let l:res = {}
-
-    for [key, value] in items(a:d)
-        if has_key(l:res, value)
-            let l:res[value] = add(l:res[value], key)
-        else
-            let l:res[value] = [key]
-        endif
-    endfor
-
-    return l:res
-endfunction
-
-
-" Meta information, used for restoring the user's mappings to the state
-" that they were before starting the debugger
-let s:mappings_save = {}
-
-" If a third argument is provided, it is used as initial value to the
-" accumulator
-function! s:reduce(funcname, list, ...) abort
-    let F = function(a:funcname)
-    let initial_provided = a:0 == 1
-    let acc = initial_provided ? a:1 : a:list[0]
-
-    for value in a:list[!initial_provided:]
-        let acc = F(acc, value)
-    endfor
-    return acc
-endfun
-
-function! s:print_dict(d)
-    for [k, v] in items(a:d)
-        echo "key:\t" k
-        echo "value:\t" v
-        echo "\n"
-    endfor
-endfunction
-
-function! s:list_to_dict(l)
-    let res = {}
-    for [key, val] in a:l
-        let res[key] = val
-    endfor
-    return res
-endfunction
-
 function! go_debug_extender#Setup(...) abort
     let user_mappings = get(g:, 'go_dbg_mappings', [])
 
-    let lhs_rhs_defaults      = s:list_to_dict(map(deepcopy(s:default_mappings),  'v:val[1:]'))
-    let lhs_cmd_defaults      = s:list_to_dict(map(deepcopy(s:default_mappings),  'reverse(v:val[:1])'))
+    let lhs_rhs_defaults      = utils#ListToDict(map(deepcopy(s:default_mappings),  'v:val[1:]'))
+    let lhs_cmd_defaults      = utils#ListToDict(map(deepcopy(s:default_mappings),  'reverse(v:val[:1])'))
 
-    let lhs_rhs_user_mappings = s:list_to_dict(map(deepcopy(user_mappings), 'v:val[1:]'))
-    let lhs_cmd_user_mappings = s:list_to_dict(map(deepcopy(user_mappings),  'reverse(v:val[:1])'))
+    let lhs_rhs_user_mappings = utils#ListToDict(map(deepcopy(user_mappings), 'v:val[1:]'))
+    let lhs_cmd_user_mappings = utils#ListToDict(map(deepcopy(user_mappings),  'reverse(v:val[:1])'))
 
     " union of the mappings, the user mappings take precedence
-    let l:merged_mappings = extend(s:reverse_dict(lhs_rhs_defaults), s:reverse_dict(lhs_rhs_user_mappings), 'force')
+    let l:merged_mappings = extend(utils#ReverseDict(lhs_rhs_defaults), utils#ReverseDict(lhs_rhs_user_mappings), 'force')
     let l:merged_commands = extend(lhs_cmd_defaults, lhs_cmd_user_mappings, 'force')
 
-    let l:flat_mappings = s:reduce("extend", values(l:merged_mappings), [])
+    let l:flat_mappings = utils#Reduce("extend", values(l:merged_mappings), [])
     let s:mappings_save = s:backup_mappings(l:flat_mappings)
-
-    " call s:print_dict(l:merged_mappings)
-    " call s:print_dict(l:merged_commands)
 
     for [rhs, lhss] in items(l:merged_mappings)
         for lhs in lhss

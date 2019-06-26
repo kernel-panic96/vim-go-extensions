@@ -32,3 +32,46 @@ function! utils#ListBreakpoints()
 
     return l:signs
 endfunction
+
+function! utils#ReverseDict(d)
+    let l:res = {}
+
+    for [key, value] in items(a:d)
+        if has_key(l:res, value)
+            let l:res[value] = add(l:res[value], key)
+        else
+            let l:res[value] = [key]
+        endif
+    endfor
+
+    return l:res
+endfunction
+
+function! utils#ListToDict(l)
+    let res = {}
+    for [key, val] in a:l
+        let res[key] = val
+    endfor
+    return res
+endfunction
+
+" If a third argument is provided, it is used as initial value to the
+" accumulator
+function! utils#Reduce(funcname, list, ...) abort
+    let F = function(a:funcname)
+    let initial_provided = a:0 == 1
+    let acc = initial_provided ? a:1 : a:list[0]
+
+    for value in a:list[!initial_provided:]
+        let acc = F(acc, value)
+    endfor
+    return acc
+endfun
+
+function! utils#PrintDict(d)
+    for [k, v] in items(a:d)
+        echo "key:\t" k
+        echo "value:\t" v
+        echo "\n"
+    endfor
+endfunction
