@@ -5,6 +5,14 @@ set cpo&vim
 
 let s:default_breakpoint_symbol = '>'
 let s:default_current_line_symbol = '='
+let s:breakpoints = {}
+" Meta information, used for restoring the user's mappings to the state
+" that they were before starting the debugger
+let s:mappings_save = {}
+
+if !exists('g:go_debug_autoupdate_quickfix_breakpoints')
+    let g:go_debug_autoupdate_quickfix_breakpoints = 0
+endif
 
 let s:default_mappings = [
     \["nnoremap", "<F5>",  "<Plug>(go-debug-continue)"],
@@ -159,6 +167,12 @@ endfunction
 function! go_debug_extender#Breakpoint(...)
     silent call call(function('go#debug#Breakpoint'), a:000)
 
+    call s:sync_breakpoint()
+
+    if g:go_debug_autoupdate_quickfix_breakpoints
+        call go_debug_extender#PopulateQuickfix()
+    endif
+
     exe ":sign define godebugbreakpoint text=" . get(g:, "go_debug_breakpoint_symbol", s:default_breakpoint_symbol)
     exe ":sign define godebugcurline text=" . get(g:, "go_debug_current_line_symbol", s:default_current_line_symbol)
 endfunction
@@ -180,6 +194,57 @@ function! go_debug_extender#ClearAllBreakpoints(...)
             call go_debug_extender#Breakpoint(bp['line'], bp['file'])
         endif
     endfor
+endfunction
+
+function! s:sync_breakpoint()
+    let l:file = expand('%:p')
+    let l:lines = split(execute('sign place file=' . file), '\n')[2:]
+
+    let l:file_bps = {}
+    for l:line in l:lines
+        if l:line !~# 'name=godebugbreakpoint'
+            continue
+        endif
+
+        let l:sign = matchlist(l:line, '\vline\=(\d+) +id\=(\d+)')
+        let [l:line, l:id] = [str2nr(l:sign[1]), str2nr(l:sign[2])]
+
+        let l:file_bps[l:line] = l:id
+    endfor
+
+    let s:breakpoints[l:file] = l:file_bps
+
+    for [k, v] in items(s:breakpoints)
+        if len(v) == 0
+            call remove(s:breakpoints, k)
+        endif
+    endfor
+endfunction
+
+function! go_debug_extender#PopulateQuickfix()
+    if len(s:breakpoints) == 0
+        call setqflist([])
+        exe 'cclose'
+        return
+    endif
+
+    call setqflist([], ' ', {'title': 'Breakpoints'})
+    for [l:file, l:line_dict] in sort(items(s:breakpoints))
+        let l:keys = keys(l:line_dict)
+        for l:lnum in sort(keys(l:line_dict), 'N')
+            let l:line = getbufline(bufname(file), l:lnum)
+            call setqflist([{'filename': l:file, 'lnum': l:lnum, 'text': l:line[0]}] , 'a')
+        endfor
+    endfor
+endfunction
+
+function! go_debug_extender#QuickfixBreakpoints()
+    call go_debug_extender#PopulateQuickfix()
+    if len(s:breakpoints)
+        silent execute 'copen'
+    else
+        echo "There are no breakpoints"
+    endif
 endfunction
 
 let &cpo = s:save_cpo
