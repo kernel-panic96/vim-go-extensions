@@ -18,7 +18,7 @@ let s:breakpoints = {}
 let s:mappings_save = {}
 
 if !exists('g:go_debug_autoupdate_quickfix_breakpoints')
-    let g:go_debug_autoupdate_quickfix_breakpoints = 0
+    let g:go_debug_autoupdate_quickfix_breakpoints = 1
 endif
 
 let s:default_mappings = [
