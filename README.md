@@ -1,9 +1,8 @@
 # vim-go-extensions
 
-## Features
-
 This plugin extends the awesome [fatih/vim-go](https://github.com/fatih/vim-go) plugin, with the following features:
 
+## Features
 * Add key mappings only for when the debugger is active
 * `:GoListBreakpoints` to show breakpoints in the quickfix window
 * `:GoClearAllBreakpoints` to clear all breakpoints
@@ -30,21 +29,29 @@ let g:go_debug_mappings = [
 \]
 ```
 Those mappings will activate when the debugger is active and will restore your previous
-bindings once the `:ExtendedGoDebugStop` command is executed, so in the example above vim's builtin `c` mapping will
+bindings once the `:ExtendedGoDebugStop` command is executed, so in the example above vim's builtin `c` semantics will
 be restored once the debugger session ends
 
+## Options
 
-##### Other miscellaneous features
+* g:go_debug_autoupdate_quickfix_breakpoints
 
-Changing the breakpoint and debugger current line  symbols:
+    Controls the autoupdating of the quickfix window, 1 (on) by default
 
-```
-let g:go_debug_breakpoint_symbol='👻'
-let g:go_debug_current_line_symbol='💩'
-```
+* g:go_debug_breakpoint_symbol, example
+    
+    ```
+    let g:go_debug_breakpoint_symbol='👻'
+    ```
 
-You have to use `:ExtendedGoDebugBreakpoint` instead of `:GoDebugBreakpoint` for that to work,
-atleast on neovim.
+* g:go_debug_current_line_symbol, example
+
+    ```
+    let g:go_debug_current_line_symbol='💩'
+    ```
+
+    You have to use `:ExtendedGoDebugBreakpoint` instead of `:GoDebugBreakpoint` for symbols to work,
+    atleast on neovim.
 
 ## License
 
