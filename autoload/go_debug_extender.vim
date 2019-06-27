@@ -31,7 +31,7 @@ let s:default_mappings = [
 
 " Example user's mappings:
 "
-" let g:go_dbg_mappings = [
+" let g:go_debug_mappings = [
 "     \['nmap <nowait>',  'c', '<Plug>(go-debug-continue)'],
 "     \['nmap',           'q', ':ExtendedGoDebugStop<CR>'],
 "     \['nmap <nowait>',  'n', '<Plug>(go-debug-next)'],
@@ -39,7 +39,7 @@ let s:default_mappings = [
 " \]
 
 function! go_debug_extender#Setup(...) abort
-    " converts the s:default_mappings and g:go_dbg_mappings (user specified mappings)
+    " converts the s:default_mappings and g:go_debug_mappings (user specified mappings)
     " to appropriate formats for merging of the mappings.
 
     " The need for merge of the mappings is performed in order to fill potential gaps
@@ -55,7 +55,7 @@ function! go_debug_extender#Setup(...) abort
     " User mappings are not limited to <Plug>(go*) rhs's (see h: rhs), anything could be mapped
     " and the user could have more that one mapping for a particular <Plug>(go*) rhs
 
-    let user_mappings = get(g:, 'go_dbg_mappings', [])
+    let user_mappings = get(g:, 'go_debug_mappings', [])
 
     let lhs_rhs_defaults      = utils#ListToDict(map(deepcopy(s:default_mappings),  'v:val[1:]'))
     let lhs_cmd_defaults      = utils#ListToDict(map(deepcopy(s:default_mappings),  'reverse(v:val[:1])'))
