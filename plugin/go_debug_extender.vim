@@ -4,3 +4,4 @@ command! -nargs=* -complete=customlist,go#package#Complete ExtendedGoDebugStop c
 command! ExtendedGoDebugBreakpoint call go_debug_extender#Breakpoint()
 command! GoClearAllBreakpoints call go_debug_extender#ClearAllBreakpoints()
 command! GoClearFileBreakpoints call go_debug_extender#ClearAllBreakpoints(expand('%:p'))
+command! GoListBreakpoints call go_debug_extender#QuickfixBreakpoints()
