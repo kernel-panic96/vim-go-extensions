@@ -9,6 +9,8 @@ This plugin extends the awesome [fatih/vim-go](https://github.com/fatih/vim-go) 
 * `:GoClearFileBreakpoints` to clear breakpoints just in the current file
 * Commands for clearing of all/file specific breakpoints
 
+![Showcase GIF](https://user-images.githubusercontent.com/17802702/60736923-6b28f080-9f61-11e9-8f90-8e353bfce819.gif)
+
 ## Install
 
 vim-go-extensions requires [vim-go](https://github.com/fatih/vim-go)
