@@ -30,7 +30,7 @@ let g:go_debug_mappings = [
     \['nmap',           's', '<Plug>(go-debug-step)'],
 \]
 ```
-Those mappings will activate when the debugger is active and will restore your previous
+Those mappings will activate upon executing `:ExtendedGoDebugStart` or `:ExtendedGoDebugTest` and will restore your previous
 bindings once the `:ExtendedGoDebugStop` command is executed, so in the example above vim's builtin `c` semantics will
 be restored once the debugger session ends
 
